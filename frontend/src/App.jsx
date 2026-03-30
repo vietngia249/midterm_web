@@ -15,7 +15,7 @@ function App() {
                 Smart Attendance
               </h1>
               <p className="text-xs text-text-muted">
-                Browser-based ML • TensorFlow.js
+                Browser-based ML | TensorFlow.js
               </p>
             </div>
           </div>
@@ -31,20 +31,20 @@ function App() {
       {/* Main Content */}
       <main className="flex-1 max-w-7xl mx-auto w-full px-6 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Webcam — takes 2/3 on large screens */}
+          {/* Webcam - takes 2/3 on large screens */}
           <div className="lg:col-span-2">
             <WebcamView />
           </div>
 
-          {/* Sidebar placeholder — will hold check-in form + stats later */}
+          {/* Sidebar - will hold check-in form and stats later */}
           <div className="space-y-4">
             <div className="glass rounded-2xl p-6 animate-fade-in">
               <h2 className="text-lg font-semibold text-text-primary mb-3">
-                📷 Camera Feed
+                Camera Feed
               </h2>
               <p className="text-sm text-text-secondary">
                 Start the camera to begin face detection. Your webcam feed stays
-                100% in your browser — no data is uploaded anywhere.
+                100% in your browser - no data is uploaded anywhere.
               </p>
               <div className="mt-4 flex flex-wrap gap-2">
                 <span className="px-2.5 py-1 rounded-lg text-xs bg-primary/10 text-primary-light border border-primary/20">
@@ -65,7 +65,7 @@ function App() {
       {/* Footer */}
       <footer className="px-6 py-4 border-t border-border">
         <div className="max-w-7xl mx-auto flex items-center justify-between text-xs text-text-muted">
-          <span>503073 — Web Programming & Applications</span>
+          <span>503073 - Web Programming and Applications</span>
           <span>Powered by TensorFlow.js + BlazeFace</span>
         </div>
       </footer>

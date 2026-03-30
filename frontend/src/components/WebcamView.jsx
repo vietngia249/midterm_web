@@ -1,7 +1,7 @@
 import { useWebcam } from '../hooks/useWebcam'
 
 /**
- * WebcamView — displays the live webcam feed with start/stop controls.
+ * WebcamView - displays the live webcam feed with start/stop controls.
  * Shows error messages for permission or hardware issues.
  */
 export default function WebcamView() {
