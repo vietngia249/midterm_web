@@ -1,3 +1,5 @@
+import WebcamView from './components/WebcamView'
+
 function App() {
   return (
     <div className="min-h-screen flex flex-col">
@@ -28,33 +30,33 @@ function App() {
 
       {/* Main Content */}
       <main className="flex-1 max-w-7xl mx-auto w-full px-6 py-8">
-        <div className="animate-fade-in">
-          <div className="glass rounded-2xl p-8 text-center">
-            <div className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center">
-              <svg className="w-10 h-10 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
-              </svg>
-            </div>
-            <h2 className="text-2xl font-bold text-text-primary mb-2">
-              Smart Attendance System
-            </h2>
-            <p className="text-text-secondary max-w-md mx-auto mb-6">
-              Real-time face detection powered by TensorFlow.js.
-              All processing happens in your browser — no data leaves your device.
-            </p>
-            <div className="flex flex-wrap justify-center gap-3">
-              <span className="px-3 py-1.5 rounded-lg text-sm bg-bg-card-hover text-text-secondary border border-border">
-                📷 Webcam Detection
-              </span>
-              <span className="px-3 py-1.5 rounded-lg text-sm bg-bg-card-hover text-text-secondary border border-border">
-                🤖 TensorFlow.js
-              </span>
-              <span className="px-3 py-1.5 rounded-lg text-sm bg-bg-card-hover text-text-secondary border border-border">
-                🔒 100% Private
-              </span>
-              <span className="px-3 py-1.5 rounded-lg text-sm bg-bg-card-hover text-text-secondary border border-border">
-                📋 Attendance Log
-              </span>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Webcam — takes 2/3 on large screens */}
+          <div className="lg:col-span-2">
+            <WebcamView />
+          </div>
+
+          {/* Sidebar placeholder — will hold check-in form + stats later */}
+          <div className="space-y-4">
+            <div className="glass rounded-2xl p-6 animate-fade-in">
+              <h2 className="text-lg font-semibold text-text-primary mb-3">
+                📷 Camera Feed
+              </h2>
+              <p className="text-sm text-text-secondary">
+                Start the camera to begin face detection. Your webcam feed stays
+                100% in your browser — no data is uploaded anywhere.
+              </p>
+              <div className="mt-4 flex flex-wrap gap-2">
+                <span className="px-2.5 py-1 rounded-lg text-xs bg-primary/10 text-primary-light border border-primary/20">
+                  TensorFlow.js
+                </span>
+                <span className="px-2.5 py-1 rounded-lg text-xs bg-secondary/10 text-secondary border border-secondary/20">
+                  BlazeFace
+                </span>
+                <span className="px-2.5 py-1 rounded-lg text-xs bg-success/10 text-success border border-success/20">
+                  Private
+                </span>
+              </div>
             </div>
           </div>
         </div>
