@@ -1,74 +1,118 @@
-import WebcamView from './components/WebcamView'
+import { useState, useCallback } from 'react'
+import { useWebcam } from './hooks/useWebcam'
+import Header from './components/Header'
+import Footer from './components/Footer'
+import CameraView from './components/CameraView'
+import ModelStatus from './components/ModelStatus'
+import CheckInForm from './components/CheckInForm'
+import DetectionInfo from './components/DetectionInfo'
+import AttendanceList from './components/AttendanceList'
+import ModelLoadingOverlay from './components/ModelLoadingOverlay'
+
+const STORAGE_KEY = 'smart-attendance-records'
+
+function loadRecords() {
+  try {
+    const data = localStorage.getItem(STORAGE_KEY)
+    return data ? JSON.parse(data) : []
+  } catch {
+    return []
+  }
+}
+
+function saveRecords(records) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(records))
+}
 
 function App() {
+  const { videoRef, isStreaming, error, startCamera, stopCamera } = useWebcam()
+
+  // Attendance records from localStorage
+  const [records, setRecords] = useState(loadRecords)
+
+  // Model state (will be connected to TF.js later)
+  const [modelStatus, setModelStatus] = useState('ready')
+
+  // Detection state (mock - will be driven by BlazeFace later)
+  const [faceDetected, setFaceDetected] = useState(false)
+  const [faceCount, setFaceCount] = useState(0)
+  const [fps, setFps] = useState(0)
+  const [latency, setLatency] = useState('0ms')
+
+  // Loading overlay (will be shown during model init)
+  const [showLoading, setShowLoading] = useState(false)
+
+  const handleCheckIn = useCallback((name) => {
+    const now = new Date()
+    const record = {
+      id: crypto.randomUUID(),
+      name,
+      timestamp: now.toISOString(),
+      date: now.toLocaleDateString(),
+      time: now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      faceDetected: true,
+      faceCount,
+    }
+    const updated = [record, ...records]
+    setRecords(updated)
+    saveRecords(updated)
+  }, [records, faceCount])
+
+  const handleClearAll = useCallback(() => {
+    setRecords([])
+    saveRecords([])
+  }, [])
+
   return (
-    <div className="min-h-screen flex flex-col">
-      {/* Header */}
-      <header className="glass sticky top-0 z-50 px-6 py-4">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-white font-bold text-lg shadow-lg">
-              SA
-            </div>
-            <div>
-              <h1 className="text-xl font-bold text-text-primary tracking-tight">
-                Smart Attendance
-              </h1>
-              <p className="text-xs text-text-muted">
-                Browser-based ML | TensorFlow.js
-              </p>
-            </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-success/10 text-success border border-success/20">
-              <span className="w-1.5 h-1.5 rounded-full bg-success animate-pulse" />
-              Client-side ML
-            </span>
-          </div>
-        </div>
-      </header>
+    <div className="bg-background text-on-background font-body min-h-screen flex flex-col">
+      <Header />
 
-      {/* Main Content */}
-      <main className="flex-1 max-w-7xl mx-auto w-full px-6 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Webcam - takes 2/3 on large screens */}
+      {/* Model Loading Overlay */}
+      <ModelLoadingOverlay
+        progress={75}
+        statusText="Optimizing WebGL Shaders"
+        isVisible={showLoading}
+      />
+
+      {/* Main Content Area */}
+      <main className="flex-1 overflow-y-auto p-4 md:p-8">
+        <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Left Section: Camera View (2/3) */}
           <div className="lg:col-span-2">
-            <WebcamView />
+            <CameraView
+              isStreaming={isStreaming}
+              onStartCamera={startCamera}
+              onStopCamera={stopCamera}
+              videoRef={videoRef}
+              error={error}
+            />
           </div>
 
-          {/* Sidebar - will hold check-in form and stats later */}
-          <div className="space-y-4">
-            <div className="glass rounded-2xl p-6 animate-fade-in">
-              <h2 className="text-lg font-semibold text-text-primary mb-3">
-                Camera Feed
-              </h2>
-              <p className="text-sm text-text-secondary">
-                Start the camera to begin face detection. Your webcam feed stays
-                100% in your browser - no data is uploaded anywhere.
-              </p>
-              <div className="mt-4 flex flex-wrap gap-2">
-                <span className="px-2.5 py-1 rounded-lg text-xs bg-primary/10 text-primary-light border border-primary/20">
-                  TensorFlow.js
-                </span>
-                <span className="px-2.5 py-1 rounded-lg text-xs bg-secondary/10 text-secondary border border-secondary/20">
-                  BlazeFace
-                </span>
-                <span className="px-2.5 py-1 rounded-lg text-xs bg-success/10 text-success border border-success/20">
-                  Private
-                </span>
-              </div>
-            </div>
+          {/* Right Section: Sidebar (1/3) */}
+          <div className="flex flex-col gap-6">
+            <ModelStatus
+              status={modelStatus}
+              backend="WebGL"
+              onRetry={() => setModelStatus('loading')}
+            />
+            <CheckInForm
+              faceDetected={faceDetected}
+              onCheckIn={handleCheckIn}
+            />
+            <DetectionInfo
+              faceCount={faceCount}
+              fps={fps}
+              latency={latency}
+            />
+            <AttendanceList
+              records={records}
+              onClearAll={handleClearAll}
+            />
           </div>
         </div>
       </main>
 
-      {/* Footer */}
-      <footer className="px-6 py-4 border-t border-border">
-        <div className="max-w-7xl mx-auto flex items-center justify-between text-xs text-text-muted">
-          <span>503073 - Web Programming and Applications</span>
-          <span>Powered by TensorFlow.js + BlazeFace</span>
-        </div>
-      </footer>
+      <Footer />
     </div>
   )
 }
