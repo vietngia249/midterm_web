@@ -43,3 +43,6 @@ demo-video/*.webm
 report/*.aux
 report/*.out
 report/*.toc
+
+agent.md
+503073-Midterm Topics.pdf
