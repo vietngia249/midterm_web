@@ -27,7 +27,7 @@ export function useFaceDetection() {
         inputWidth: 128,
         inputHeight: 128,
         iouThreshold: 0.3,
-        scoreThreshold: 0.75
+        scoreThreshold: 0.55 // Lowered for better recall in varied lighting
       })
 
       modelRef.current = model
@@ -57,7 +57,7 @@ export function useFaceDetection() {
   // Function to detect faces from a video element
   const detectFaces = useCallback(async (videoElement) => {
     if (!modelRef.current || modelStatus !== 'ready') return []
-    if (!videoElement || videoElement.readyState !== 4) return []
+    if (!videoElement || videoElement.readyState !== 4 || videoElement.videoWidth === 0) return []
 
     try {
       // returnPredictions: true gives detailed results array
