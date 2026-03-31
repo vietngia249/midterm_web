@@ -1,16 +1,49 @@
-# React + Vite
+# Smart Attendance System (Browser-Based ML)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A high-fidelity implementation of a Smart Attendance System running entirely in the browser using React, TailwindCSS, and TensorFlow.js.
 
-Currently, two official plugins are available:
+## Overview
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+This project uses the `BlazeFace` model to perform real-time face detection on a live webcam feed. The application does not rely on a backend server or external API for inference. All machine learning processes run client-side via WebGL acceleration.
 
-## React Compiler
+Features:
+- Live face detection with bounding box rendering
+- Real-time performance tracking (FPS and latency)
+- Identity verification and attendance logging
+- Persistent record storage using `localStorage`
+- Material Design 3 "Luminal" UI methodology
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Setup Instructions
 
-## Expanding the ESLint configuration
+### Prerequisites
+- Node.js (v18+)
+- pnpm (or npm/yarn)
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+### Installation
+
+1. Navigate to the frontend directory:
+   ```bash
+   cd frontend
+   ```
+
+2. Install dependencies:
+   ```bash
+   pnpm install
+   ```
+
+3. Start the development server:
+   ```bash
+   pnpm dev
+   ```
+
+## Technology Stack
+
+- **Frontend Framework:** React 18, Vite
+- **Styling:** TailwindCSS v4
+- **Machine Learning Engine:** TensorFlow.js (`@tensorflow/tfjs`)
+- **Backend Acceleration:** WebGL (`@tensorflow/tfjs-backend-webgl`)
+- **Detection Model:** BlazeFace (`@tensorflow-models/blazeface`)
+
+## Academic Context
+Course: 503073 - Web Programming and Applications
+Module: Topic 4 - Machine Learning on the Web
