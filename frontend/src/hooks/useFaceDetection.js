@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import * as tf from '@tensorflow/tfjs'
 import '@tensorflow/tfjs-backend-webgl'
+import '@tensorflow/tfjs-backend-wasm'
 import * as blazeface from '@tensorflow-models/blazeface'
 
 export function useFaceDetection() {
@@ -15,8 +16,16 @@ export function useFaceDetection() {
       setModelStatus('loading')
       setLoadProgress(10)
 
-      // Initialize CPU backend to rule out WebGL texture bugs
-      await tf.setBackend('cpu')
+      // Try WebGL first, then WASM, then fallback to CPU
+      const backendsToTry = ['webgl', 'wasm', 'cpu']
+      for (const b of backendsToTry) {
+        try {
+          const success = await tf.setBackend(b)
+          if (success) break
+        } catch (e) {
+          console.warn(`Backend ${b} failed to initialize, trying next...`)
+        }
+      }
       await tf.ready()
       setBackend(tf.getBackend())
       setLoadProgress(40)
@@ -82,11 +91,33 @@ export function useFaceDetection() {
     }
   }, [modelStatus])
 
+  // Function to manually switch backend
+  const switchBackend = useCallback(async (newBackend) => {
+    try {
+      setModelStatus('loading')
+      const success = await tf.setBackend(newBackend)
+      if (success) {
+        await tf.ready()
+        setBackend(tf.getBackend())
+        setTimeout(() => {
+          setModelStatus('ready')
+        }, 300)
+      } else {
+        console.warn(`Failed to switch to ${newBackend}`)
+        setModelStatus('error')
+      }
+    } catch (err) {
+      console.error('Backend switch error:', err)
+      setModelStatus('error')
+    }
+  }, [])
+
   return {
     modelStatus,
     loadProgress,
     backend,
     detectFaces,
-    retryLoad: loadModel
+    retryLoad: loadModel,
+    switchBackend
   }
 }

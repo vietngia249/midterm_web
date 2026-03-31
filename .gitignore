@@ -44,9 +44,10 @@ report/*.aux
 report/*.out
 report/*.toc
 
-agent.md
+stitch/
+docs/
 503073-Midterm Topics.pdf
 smart-commit.sh
 rewrite-dates.sh
-stitch/
 ui_ux_specification.txt
+agent.md

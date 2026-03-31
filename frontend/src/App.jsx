@@ -30,7 +30,7 @@ function App() {
   const canvasRef = useRef(null)
   
   // TensorFlow ML Hook
-  const { modelStatus, loadProgress, backend, detectFaces, retryLoad } = useFaceDetection()
+  const { modelStatus, loadProgress, backend, detectFaces, retryLoad, switchBackend } = useFaceDetection()
 
   // Attendance records from localStorage
   const [records, setRecords] = useState(loadRecords)
@@ -201,6 +201,7 @@ function App() {
               status={modelStatus}
               backend={backend || 'WebGL'}
               onRetry={retryLoad}
+              onSwitchBackend={switchBackend}
             />
             <CheckInForm
               faceDetected={faceDetected}
