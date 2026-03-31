@@ -4,7 +4,7 @@ import { useWebcam } from '../hooks/useWebcam'
  * CameraView - displays live webcam feed with detection overlay and controls.
  * Matches the Stitch dashboard design with LIVE badge, detection box, and stop button.
  */
-export default function CameraView({ isStreaming, onStartCamera, onStopCamera, videoRef, error }) {
+export default function CameraView({ isStreaming, onStartCamera, onStopCamera, videoRef, canvasRef, error }) {
   return (
     <div className="flex flex-col gap-6">
       {/* Camera Feed Container */}
@@ -21,6 +21,7 @@ export default function CameraView({ isStreaming, onStartCamera, onStopCamera, v
 
         {/* Canvas for detection overlay - positioned over video */}
         <canvas
+          ref={canvasRef}
           id="detection-canvas"
           className={`absolute inset-0 w-full h-full ${isStreaming ? 'block' : 'hidden'}`}
         />

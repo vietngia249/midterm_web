@@ -1,5 +1,6 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect, useRef } from 'react'
 import { useWebcam } from './hooks/useWebcam'
+import { useFaceDetection } from './hooks/useFaceDetection'
 import Header from './components/Header'
 import Footer from './components/Footer'
 import CameraView from './components/CameraView'
@@ -25,22 +26,24 @@ function saveRecords(records) {
 }
 
 function App() {
-  const { videoRef, isStreaming, error, startCamera, stopCamera } = useWebcam()
+  const { videoRef, isStreaming, error: webcamError, startCamera, stopCamera } = useWebcam()
+  const canvasRef = useRef(null)
+  
+  // TensorFlow ML Hook
+  const { modelStatus, loadProgress, backend, detectFaces, retryLoad } = useFaceDetection()
 
   // Attendance records from localStorage
   const [records, setRecords] = useState(loadRecords)
 
-  // Model state (will be connected to TF.js later)
-  const [modelStatus, setModelStatus] = useState('ready')
-
-  // Detection state (mock - will be driven by BlazeFace later)
+  // Detection UI state
   const [faceDetected, setFaceDetected] = useState(false)
   const [faceCount, setFaceCount] = useState(0)
   const [fps, setFps] = useState(0)
   const [latency, setLatency] = useState('0ms')
-
-  // Loading overlay (will be shown during model init)
-  const [showLoading, setShowLoading] = useState(false)
+  
+  // Animation frames for detection loop
+  const requestRef = useRef()
+  const lastFrameTime = useRef(performance.now())
 
   const handleCheckIn = useCallback((name) => {
     const now = new Date()
@@ -63,15 +66,136 @@ function App() {
     saveRecords([])
   }, [])
 
+  // Core detection and drawing loop
+  const detectAndDraw = useCallback(async () => {
+    if (!isStreaming || modelStatus !== 'ready' || !videoRef.current || !canvasRef.current) {
+      if (requestRef.current) cancelAnimationFrame(requestRef.current)
+      return
+    }
+
+    const video = videoRef.current
+    const canvas = canvasRef.current
+    const ctx = canvas.getContext('2d')
+
+    // Only configure canvas size if video is actually ready and has dimensions
+    if (video.videoWidth > 0 && video.videoHeight > 0) {
+      // Match canvas size to video aspect
+      if (canvas.width !== video.clientWidth || canvas.height !== video.clientHeight) {
+         canvas.width = video.clientWidth
+         canvas.height = video.clientHeight
+      }
+
+      // Calculate latency
+      const startTime = performance.now()
+      
+      // Run inference
+      const predictions = await detectFaces(video)
+      
+      const endTime = performance.now()
+      setLatency(`${Math.round(endTime - startTime)}ms`)
+
+      // Calculate FPS
+      const currentFrameTime = performance.now()
+      const timeDiff = currentFrameTime - lastFrameTime.current
+      if (timeDiff > 0) {
+        setFps(Math.round(1000 / timeDiff))
+      }
+      lastFrameTime.current = currentFrameTime
+
+      // Update basic state
+      setFaceCount(predictions.length)
+      setFaceDetected(predictions.length > 0)
+
+      // Clear previous drawings
+      ctx.clearRect(0, 0, canvas.width, canvas.height)
+
+      if (predictions.length > 0) {
+        // Calculate scale since video presentation size differs from actual intrinsic size
+        const scaleX = canvas.width / video.videoWidth
+        const scaleY = canvas.height / video.videoHeight
+
+        predictions.forEach(prediction => {
+          // BlazeFace returns [topLeft, bottomRight]
+          const [start, end] = prediction.topLeft && prediction.bottomRight 
+            ? [prediction.topLeft, prediction.bottomRight]
+            : [prediction.box.startPoint, prediction.box.endPoint]
+
+          // The video layout uses transform: scaleX(-1) (mirrored), but coordinates from BlazeFace 
+          // consider the original pixel data. We must flip X coordinates visually on canvas to match
+          // the mirrored video element. Let's flip everything horizontally.
+          
+          const rawWidth = end[0] - start[0]
+          const rawHeight = end[1] - start[1]
+          
+          const boxWidth = rawWidth * scaleX
+          const boxHeight = rawHeight * scaleY
+          const rawX = start[0] * scaleX
+          const y = start[1] * scaleY
+
+          // Mirror X
+          const x = canvas.width - rawX - boxWidth
+
+          // Draw bounding box
+          ctx.strokeStyle = '#10b981' // Success Green
+          ctx.lineWidth = 3
+          ctx.strokeRect(x, y, boxWidth, boxHeight)
+
+          // Draw Probability string if available
+          let confText = 'DETECTED'
+          if (prediction.probability && prediction.probability[0]) {
+            confText = `MATCH: ${Math.round(prediction.probability[0] * 100)}%`
+          }
+
+          ctx.fillStyle = '#ffffff' // White Pill
+          
+          // Pill background
+          ctx.beginPath()
+          ctx.roundRect(x, y - 30, 140, 24, 12)
+          ctx.fill()
+          
+          // Label text
+          ctx.fillStyle = '#0f172a' // Dark text
+          ctx.font = 'bold 12px Inter, sans-serif'
+          ctx.fillText(`FACE | ${confText}`, x + 10, y - 14)
+        })
+      }
+    }
+
+    // Schedule next frame
+    requestRef.current = requestAnimationFrame(detectAndDraw)
+  }, [isStreaming, modelStatus, detectFaces])
+
+  // Start the drawing loop whenever stream and model are ready
+  useEffect(() => {
+    if (isStreaming && modelStatus === 'ready') {
+      requestRef.current = requestAnimationFrame(detectAndDraw)
+    } else {
+      // Clear canvas and cancel if stream stops
+      if (requestRef.current) cancelAnimationFrame(requestRef.current)
+      if (canvasRef.current) {
+        const ctx = canvasRef.current.getContext('2d')
+        ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height)
+      }
+      setFaceCount(0)
+      setFaceDetected(false)
+      setFps(0)
+      setLatency('0ms')
+    }
+
+    return () => {
+      if (requestRef.current) cancelAnimationFrame(requestRef.current)
+    }
+  }, [isStreaming, modelStatus, detectAndDraw])
+
   return (
     <div className="bg-background text-on-background font-body min-h-screen flex flex-col">
       <Header />
 
       {/* Model Loading Overlay */}
       <ModelLoadingOverlay
-        progress={75}
-        statusText="Optimizing WebGL Shaders"
-        isVisible={showLoading}
+        progress={loadProgress}
+        statusText={loadProgress < 50 ? "Initializing WebGL Backend" : "Loading Face Detection Model"}
+        isVisible={modelStatus === 'loading'}
       />
 
       {/* Main Content Area */}
@@ -84,7 +208,8 @@ function App() {
               onStartCamera={startCamera}
               onStopCamera={stopCamera}
               videoRef={videoRef}
-              error={error}
+              canvasRef={canvasRef}
+              error={webcamError}
             />
           </div>
 
@@ -92,8 +217,8 @@ function App() {
           <div className="flex flex-col gap-6">
             <ModelStatus
               status={modelStatus}
-              backend="WebGL"
-              onRetry={() => setModelStatus('loading')}
+              backend={backend || 'WebGL'}
+              onRetry={retryLoad}
             />
             <CheckInForm
               faceDetected={faceDetected}
