@@ -21,14 +21,8 @@ export function useFaceDetection() {
       setBackend(tf.getBackend())
       setLoadProgress(40)
 
-      // Load BlazeFace model
-      const model = await blazeface.load({
-        maxFaces: 10,
-        inputWidth: 128,
-        inputHeight: 128,
-        iouThreshold: 0.3,
-        scoreThreshold: 0.55 // Lowered for better recall in varied lighting
-      })
+      // Load BlazeFace model with defaults. Custom sizes might conflict with the compiled graph.
+      const model = await blazeface.load()
 
       modelRef.current = model
       setLoadProgress(100)
@@ -54,14 +48,30 @@ export function useFaceDetection() {
     }
   }, [loadModel])
 
+  // Offscreen canvas for TFJS to read pixels safely
+  const offscreenCanvasRef = useRef(null)
+
   // Function to detect faces from a video element
   const detectFaces = useCallback(async (videoElement) => {
     if (!modelRef.current || modelStatus !== 'ready') return []
     if (!videoElement || videoElement.readyState !== 4 || videoElement.videoWidth === 0) return []
 
     try {
-      // returnPredictions: true gives detailed results array
-      const predictions = await modelRef.current.estimateFaces(videoElement, false)
+      if (!offscreenCanvasRef.current) {
+        offscreenCanvasRef.current = document.createElement('canvas')
+      }
+      
+      const canvas = offscreenCanvasRef.current
+      if (canvas.width !== videoElement.videoWidth || canvas.height !== videoElement.videoHeight) {
+        canvas.width = videoElement.videoWidth
+        canvas.height = videoElement.videoHeight
+      }
+
+      const ctx = canvas.getContext('2d', { willReadFrequently: true })
+      ctx.drawImage(videoElement, 0, 0, canvas.width, canvas.height)
+
+      // Pass the canvas instead of video to prevent WebGL silent read failures
+      const predictions = await modelRef.current.estimateFaces(canvas, false)
       return predictions
     } catch (err) {
       console.error('Detection error:', err)
