@@ -292,6 +292,7 @@ git push origin main
 | 5    | Face detection loop              | Done     | feat: integrate all components into app with localstorage and running ML inference detection loop, updating specific tracking states                                                                                                                                                                                        |
 | 6    | Check-in & localStorage logic    | Done     | feat: integrate all components into app with localstorage, wiring up attendance list with check-in buttons properly                                                                                                                                                                                                         |
 | 7    | Dashboard & UI Polish            | Done     | docs: add academic README and finalize system polish                                                                                                                                                                                                                                                                        |
+| 8    | Bonus Features                   | Done     | feat: add export csv functionality for attendance records with UTF-8 BOM                                                                                                                                                                                                                                                    |
 
 ---
 

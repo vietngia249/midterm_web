@@ -21,9 +21,9 @@ export default function AttendanceList({ records = [], onClearAll }) {
       [r.id, `"${r.name}"`, r.date, r.time, r.faceCount].join(',')
     )
     
-    // Combine and create blob
+    // Combine and create blob with UTF-8 BOM for Excel compatibility
     const csvContent = [headers.join(','), ...rows].join('\n')
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+    const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' })
     
     // Create download link
     const link = document.createElement('a')
