@@ -10,6 +10,32 @@ export default function AttendanceList({ records = [], onClearAll }) {
     { bg: 'bg-secondary/10', border: 'border-secondary/20', text: 'text-secondary' },
   ]
 
+  const handleExportCSV = () => {
+    if (records.length === 0) return
+
+    // Create CSV header
+    const headers = ['ID', 'Name', 'Date', 'Time', 'Face Count']
+    
+    // Create CSV rows
+    const rows = records.map(r => 
+      [r.id, `"${r.name}"`, r.date, r.time, r.faceCount].join(',')
+    )
+    
+    // Combine and create blob
+    const csvContent = [headers.join(','), ...rows].join('\n')
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+    
+    // Create download link
+    const link = document.createElement('a')
+    const url = URL.createObjectURL(blob)
+    link.setAttribute('href', url)
+    link.setAttribute('download', `smart-attendance-${new Date().toISOString().slice(0, 10)}.csv`)
+    link.style.visibility = 'hidden'
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+  }
+
   return (
     <div className="p-6 rounded-2xl bg-surface-container-high flex flex-col max-h-[400px]">
       <div className="flex justify-between items-center mb-6">
@@ -47,13 +73,30 @@ export default function AttendanceList({ records = [], onClearAll }) {
         </div>
       )}
 
-      <button
-        id="btn-clear-records"
-        onClick={onClearAll}
-        className="mt-6 w-full py-2 text-[11px] font-bold text-on-surface-variant uppercase tracking-widest border border-white/10 rounded-lg hover:bg-error/10 hover:text-error hover:border-error/20 transition-all cursor-pointer"
-      >
-        Clear All Records
-      </button>
+      <div className="mt-6 flex gap-2">
+        <button
+          onClick={handleExportCSV}
+          disabled={records.length === 0}
+          className={`flex-1 py-2 text-[11px] font-bold uppercase tracking-widest rounded-lg transition-all cursor-pointer ${
+            records.length === 0 
+              ? 'bg-surface-container-highest/20 text-on-surface/20 cursor-not-allowed border border-transparent' 
+              : 'text-primary border border-primary/20 hover:bg-primary/10 hover:border-primary/40'
+          }`}
+        >
+          Export CSV
+        </button>
+        <button
+          onClick={onClearAll}
+          disabled={records.length === 0}
+          className={`flex-1 py-2 text-[11px] font-bold uppercase tracking-widest rounded-lg transition-all cursor-pointer ${
+            records.length === 0 
+              ? 'bg-surface-container-highest/20 text-on-surface/20 cursor-not-allowed border border-transparent' 
+              : 'text-on-surface-variant border border-white/10 hover:bg-error/10 hover:text-error hover:border-error/20'
+          }`}
+        >
+          Clear All
+        </button>
+      </div>
     </div>
   )
 }

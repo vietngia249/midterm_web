@@ -10,6 +10,7 @@ Features:
 - Live face detection with bounding box rendering
 - Real-time performance tracking (FPS and latency)
 - Identity verification and attendance logging
+- Export attendance logs to CSV formats
 - Persistent record storage using `localStorage`
 - Material Design 3 "Luminal" UI methodology
 
