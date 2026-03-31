@@ -15,14 +15,17 @@ export function useFaceDetection() {
       setModelStatus('loading')
       setLoadProgress(10)
 
-      // Initialize WebGL backend
-      await tf.setBackend('webgl')
+      // Initialize CPU backend to rule out WebGL texture bugs
+      await tf.setBackend('cpu')
       await tf.ready()
       setBackend(tf.getBackend())
       setLoadProgress(40)
 
-      // Load BlazeFace model with defaults. Custom sizes might conflict with the compiled graph.
-      const model = await blazeface.load()
+      // Load BlazeFace model
+      const model = await blazeface.load({
+        maxFaces: 10,
+        scoreThreshold: 0.55 // Restored proper threshold after debugging
+      })
 
       modelRef.current = model
       setLoadProgress(100)
