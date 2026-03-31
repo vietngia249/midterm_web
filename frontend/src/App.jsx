@@ -135,28 +135,10 @@ function App() {
           // Mirror X
           const x = canvas.width - rawX - boxWidth
 
-          // Draw bounding box
+          // Draw bounding box only
           ctx.strokeStyle = '#10b981' // Success Green
           ctx.lineWidth = 3
           ctx.strokeRect(x, y, boxWidth, boxHeight)
-
-          // Draw Probability string if available
-          let confText = 'DETECTED'
-          if (prediction.probability && prediction.probability[0]) {
-            confText = `MATCH: ${Math.round(prediction.probability[0] * 100)}%`
-          }
-
-          ctx.fillStyle = '#ffffff' // White Pill
-          
-          // Pill background
-          ctx.beginPath()
-          ctx.roundRect(x, y - 30, 140, 24, 12)
-          ctx.fill()
-          
-          // Label text
-          ctx.fillStyle = '#0f172a' // Dark text
-          ctx.font = 'bold 12px Inter, sans-serif'
-          ctx.fillText(`FACE | ${confText}`, x + 10, y - 14)
         })
       }
     }
