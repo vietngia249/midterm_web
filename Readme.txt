@@ -14,6 +14,12 @@ Sinh viên thực hiện: Nguyễn Việt Nghĩa (MSSV: 52400024)
 3. CÁCH CÀI ĐẶT VÀ CHẠY KIỂM THỬ (TESTING)
 Dự án này là ứng dụng nền Web (phối hợp React + Vite), quản lý cấu trúc thư viện độc quyền qua tệp package.json (Lưu ý: Kiến trúc dự án thuộc Môn Lập trình Web, đây không phải ứng dụng giao diện di động Flutter nên hệ thống không bao gồm và không sử dụng tệp pubspec.yaml).
 
+Nếu cài từ github thì cần chạy lệnh sau (bỏ qua nếu đã có src rồi, link github: https://github.com/vietngia249/midterm_web.git):
+```bash
+git clone https://github.com/vietngia249/midterm_web.git
+```
+
+Note: bỏ qua bước này nếu đã có src rồi
 Bước 1: Mở Terminal / Command Prompt và di chuyển vào thư mục frontend:
 ```bash
 cd frontend
@@ -40,7 +46,9 @@ Bước 4: Hướng dẫn kiểm thử chức năng trên trình duyệt:
 - Quan sát danh sách cập nhật trực tiếp kế bên, nhấn phím "Export CSV" nhằm mục đích tải tệp tin báo cáo sinh viên toàn vẹn định dạng utf-8 về máy để kiểm chứng độ chính xác.
 
 4. CẤU TRÚC THƯ MỤC CỐT LÕI (DIRECTORY STRUCTURE)
-- /frontend/src/App.jsx: Các phân đoạn tổng quản điều phối giao diện chính của toàn hệ thống.
-- /frontend/src/hooks/useFaceDetection.js: Logic vòng lặp chạy suy luận thuật toán học máy TensorFlow.js (Inference) và mã hóa kết quả vẽ lại Bounding Boxes trên Canvas.
-- /frontend/package.json: Danh sách liệt kê tất cả trình cài đặt các phụ thuộc của dự án môi trường Runtime Node.js.
-- /docs/report.md: Tệp tin Markdown mô tả báo cáo lý thuyết chuyên sâu, khái quát lưu đồ kiến trúc hoạt động hệ thống kèm bảng thống kê phân tích Machine Learning cấp độ Đại học.
+- /src/App.jsx: Các phân đoạn tổng quản điều phối giao diện chính của toàn hệ thống.
+- /src/hooks/useFaceDetection.js: Logic vòng lặp chạy suy luận thuật toán học máy TensorFlow.js (Inference) và mã hóa kết quả vẽ lại Bounding Boxes trên Canvas.
+- /package.json: Danh sách liệt kê tất cả trình cài đặt các phụ thuộc của dự án môi trường Runtime Node.js.
+
+Note: đây là link video demo dự phòng
+https://youtu.be/VPeXPW0pxRI
